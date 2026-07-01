@@ -12,6 +12,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { Pencil, Save, X, FileText, Download, Loader2, Paperclip } from 'lucide-react';
 import { format } from 'date-fns';
+import { sessions as sessionsApi } from '@/api/apiClient';
 
 const statusColors = {
   recording: 'bg-red-100 text-red-700',
@@ -35,12 +36,18 @@ export default function SessionDetailDialog({ session, onClose, readOnly = false
   }, [session?.id]);
 
   const saveMutation = useMutation({
-    mutationFn: async () => {
-      // TODO: Implement save session changes API endpoint
-      return Promise.resolve({});
-    },
+    mutationFn: async () => sessionsApi.update(session.id, {
+      title: session.title,
+      patientName: session.patient_name,
+      visitType: session.visit_type,
+      transcript,
+      soapNote,
+      duration: session.duration,
+      status: session.status,
+      uploadedFiles: session.uploaded_files,
+    }),
     onSuccess: () => {
-      queryClient.invalidateQueries(['sessions']);
+      queryClient.invalidateQueries({ queryKey: ['sessions'] });
       toast.success('Session updated');
       setEditing(false);
     },

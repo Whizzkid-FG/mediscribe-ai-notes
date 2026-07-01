@@ -40,6 +40,7 @@ import EmptyState from '../components/common/EmptyState';
 import ShareSessionDialog from '../components/sessions/ShareSessionDialog';
 import VersionHistoryDialog from '../components/sessions/VersionHistoryDialog';
 import SessionDetailDialog from '../components/sessions/SessionDetailDialog';
+import { sessions as sessionsApi } from '../api/apiClient';
 
 export default function Sessions() {
   const queryClient = useQueryClient();
@@ -57,23 +58,17 @@ export default function Sessions() {
 
   const { data: sessions = [], isLoading } = useQuery({
     queryKey: ['sessions'],
-    queryFn: async () => {
-      // TODO: Implement sessions list API endpoint
-      return [];
-    }
+    queryFn: () => sessionsApi.list(),
   });
 
   const { data: sharedData, isLoading: sharedLoading } = useQuery({
     queryKey: ['shared-sessions'],
-    queryFn: async () => {
-      // TODO: Implement shared sessions API endpoint
-      return [];
-    }
+    queryFn: async () => [],
   });
   const sharedSessions = sharedData || [];
 
   const deleteMutation = useMutation({
-    mutationFn: (id) => Promise.resolve({}), // TODO: Implement delete session API
+    mutationFn: (id) => sessionsApi.remove(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['sessions'] });
       toast.success('Session deleted');

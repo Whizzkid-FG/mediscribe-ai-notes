@@ -1,3 +1,5 @@
+import path from 'path';
+import { fileURLToPath } from 'url';
 import { query } from '../config/database.js';
 
 /**
@@ -32,6 +34,29 @@ async function initializeDatabase() {
       CREATE INDEX IF NOT EXISTS idx_users_license ON users(license_number);
     `);
 
+    await query(`
+      CREATE TABLE IF NOT EXISTS sessions (
+        id SERIAL PRIMARY KEY,
+        user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+        title VARCHAR(255),
+        patient_name VARCHAR(255),
+        visit_type VARCHAR(100) DEFAULT 'routine',
+        transcript TEXT NOT NULL DEFAULT '',
+        soap_note TEXT,
+        duration INTEGER DEFAULT 0,
+        status VARCHAR(50) NOT NULL DEFAULT 'draft',
+        uploaded_files JSONB NOT NULL DEFAULT '[]'::jsonb,
+        created_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      );
+    `);
+
+    await query(`
+      CREATE INDEX IF NOT EXISTS idx_sessions_user_id ON sessions(user_id);
+      CREATE INDEX IF NOT EXISTS idx_sessions_status ON sessions(status);
+      CREATE INDEX IF NOT EXISTS idx_sessions_created_date ON sessions(created_date);
+    `);
+
     console.log('✅ Database initialized successfully');
   } catch (error) {
     console.error('❌ Database initialization failed:', error);
@@ -39,4 +64,11 @@ async function initializeDatabase() {
   }
 }
 
-initializeDatabase();
+export default initializeDatabase;
+
+const isDirectRun = process.argv[1]
+  && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url);
+
+if (isDirectRun) {
+  initializeDatabase();
+}

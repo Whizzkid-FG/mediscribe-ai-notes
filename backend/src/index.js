@@ -4,6 +4,8 @@ import rateLimit from 'express-rate-limit';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import authRoutes from './routes/auth.js';
+import sessionsRoutes from './routes/sessions.js';
+import initializeDatabase from './migrations/init.js';
 
 dotenv.config();
 
@@ -61,6 +63,7 @@ app.use((req, res, next) => {
 
 // Routes
 app.use('/api/auth', authLimiter, authRoutes);
+app.use('/api/sessions', sessionsRoutes);
 
 // Health check endpoint
 app.get('/health', (req, res) => {
@@ -92,6 +95,8 @@ app.use((err, req, res, next) => {
 });
 
 // Start server
+await initializeDatabase();
+
 app.listen(PORT, () => {
   console.log(`\n🏥 MedScribe API Server`);
   console.log(`📍 Running on http://localhost:${PORT}`);

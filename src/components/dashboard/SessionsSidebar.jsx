@@ -3,9 +3,11 @@ import { useQuery } from '@tanstack/react-query';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { Search, ChevronLeft, ChevronRight, Clock, FileText, User } from 'lucide-react';
 import { format, isToday, isYesterday } from 'date-fns';
 import SessionDetailDialog from '../sessions/SessionDetailDialog';
+import { sessions as sessionsApi } from '@/api/apiClient';
 
 const statusColors = {
   recording: 'bg-red-100 text-red-700',
@@ -33,14 +35,9 @@ export default function SessionsSidebar() {
   const [search, setSearch] = useState('');
   const [selectedSession, setSelectedSession] = useState(null);
 
-  // TODO: Implement sessions API endpoint in backend
-  // For now, use empty array since sessions backend is not yet implemented
   const { data: sessions = [] } = useQuery({
     queryKey: ['sessions'],
-    queryFn: async () => {
-      // Return empty array until sessions API is implemented
-      return [];
-    },
+    queryFn: () => sessionsApi.list(),
   });
 
   const filtered = sessions.filter(s => {

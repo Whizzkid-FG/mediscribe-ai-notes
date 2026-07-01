@@ -123,4 +123,31 @@ export const auth = {
   },
 };
 
+export const sessions = {
+  list: async () => {
+    const response = await apiClient.get('/sessions');
+    return response.data.sessions;
+  },
+
+  get: async (id) => {
+    const response = await apiClient.get(`/sessions/${id}`);
+    return response.data.session;
+  },
+
+  create: async (data) => {
+    const response = await apiClient.post('/sessions', data);
+    return response.data.session;
+  },
+
+  update: async (id, data) => {
+    const response = await apiClient.put(`/sessions/${id}`, data);
+    return response.data.session;
+  },
+
+  remove: async (id) => {
+    const response = await apiClient.delete(`/sessions/${id}`);
+    return response.data;
+  },
+};
+
 export default apiClient;

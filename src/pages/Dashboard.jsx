@@ -36,6 +36,7 @@ import SOAPNoteEditor from '../components/soap/SOAPNoteEditor';
 import WelcomeGuide from '../components/dashboard/WelcomeGuide';
 import FileUploadZone from '../components/sessions/FileUploadZone';
 import SessionsSidebar from '../components/dashboard/SessionsSidebar';
+import { sessions as sessionsApi } from '../api/apiClient';
 
 export default function Dashboard() {
   const queryClient = useQueryClient();
@@ -89,10 +90,7 @@ export default function Dashboard() {
 
   // Mutations
   const saveSessionMutation = useMutation({
-    mutationFn: (data) => {
-      // TODO: Implement session save API endpoint
-      return Promise.resolve({ id: Date.now() });
-    },
+    mutationFn: (data) => sessionsApi.create(data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['sessions'] });
       toast.success('Session saved successfully');
@@ -319,14 +317,20 @@ export default function Dashboard() {
   };
 
   const handleSaveSession = async () => {
-    // TODO: Implement session save API endpoint
-    const soapString = soapNote 
-      ? `SUBJECTIVE:\n${soapNote.subjective}\n\nOBJECTIVE:\n${soapNote.objective}\n\nASSESSMENT:\n${soapNote.assessment}\n\nPLAN:\n${soapNote.plan}`
-      : '';
-
-    toast.success('Session saved successfully');
-    setShowSaveDialog(false);
-    resetSession();
+    saveSessionMutation.mutate({
+      title: sessionTitle || 'Untitled Session',
+      patientName,
+      visitType,
+      transcript,
+      soapNote: typeof soapNote === 'string'
+        ? soapNote
+        : soapNote
+          ? `SUBJECTIVE:\n${soapNote.subjective || ''}\n\nOBJECTIVE:\n${soapNote.objective || ''}\n\nASSESSMENT:\n${soapNote.assessment || ''}\n\nPLAN:\n${soapNote.plan || ''}`
+          : '',
+      duration,
+      status: 'completed',
+      uploadedFiles,
+    });
   };
 
   const handleSaveLater = () => {
